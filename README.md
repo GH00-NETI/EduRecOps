@@ -106,10 +106,6 @@ tests/                  Policy, event-contract và metric tests
 
 Xem [research plan](docs/research-plan.md), [evaluation protocol](docs/evaluation.md), [architecture](docs/architecture.md), [data contracts](docs/data-contracts.md) và [runbook](docs/runbook.md).
 
-## Nguồn cảm hứng và tính độc lập
-
-Dự án học hỏi các pattern kiến trúc production từ [RecSys-MLops](https://github.com/itsmekhoathekid/RecSys-MLops/) như streaming features, feature store, registry, canary và observability. EduRecOps không sao chép miền e-commerce hay mã nguồn của repo đó: bài toán, data contract, prerequisite policy, learning-outcome evaluation, mã nguồn và tài liệu được xây dựng riêng. Xem [NOTICE.md](NOTICE.md).
-
 ## License
 
 MIT — xem [LICENSE](LICENSE).
