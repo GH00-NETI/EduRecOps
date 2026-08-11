@@ -1,0 +1,15 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: edurec-ranker
+  namespace: ml-serving
+spec:
+  predictor:
+    canaryTrafficPercent: 10
+    model:
+      modelFormat:
+        name: onnx
+      storageUri: s3://edurec-models/ranker/candidate/
+      resources:
+        requests: {cpu: "500m", memory: "1Gi"}
+        limits: {cpu: "2", memory: "4Gi"}

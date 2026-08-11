@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: edurec-api}
+spec:
+  replicas: 2
+  selector: {matchLabels: {app: edurec-api}}
+  template:
+    metadata: {labels: {app: edurec-api}}
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/example/edurec-api:0.1.0
+          ports: [{containerPort: 8000}]
+          readinessProbe: {httpGet: {path: /health, port: 8000}, initialDelaySeconds: 5}
+          resources:
+            requests: {cpu: "200m", memory: "256Mi"}
+            limits: {cpu: "1", memory: "1Gi"}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: edurec-api}
+spec:
+  selector: {app: edurec-api}
+  ports: [{port: 80, targetPort: 8000}]

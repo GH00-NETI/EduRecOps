@@ -1,0 +1,13 @@
+groups:
+  - name: edurecops
+    rules:
+      - alert: RecommendationApiErrorRateHigh
+        expr: sum(rate(edurec_recommendation_requests_total{status="error"}[5m])) / clamp_min(sum(rate(edurec_recommendation_requests_total[5m])), 0.001) > 0.02
+        for: 10m
+        labels: {severity: warning}
+        annotations: {summary: "EduRecOps recommendation error rate is above 2%"}
+      - alert: FeatureStoreFallbackActive
+        expr: increase(edurec_feature_fallback_total[10m]) > 10
+        for: 5m
+        labels: {severity: warning}
+        annotations: {summary: "EduRecOps is serving fallback learner profiles"}
