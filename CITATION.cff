@@ -1,0 +1,7 @@
+cff-version: 1.2.0
+title: EduRecOps
+message: "If you use this project in academic work, cite this repository."
+type: software
+version: 0.2.0
+license: MIT
+repository-code: "https://github.com/GH00-NETI/EduRecOps"
