@@ -1,0 +1,100 @@
+name: edurecops
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-edurec}
+      POSTGRES_USER: ${POSTGRES_USER:-edurec}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-edurec_dev}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports: ["5432:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-edurec}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redpanda:
+    image: redpandadata/redpanda:v24.3.1
+    command: ["redpanda", "start", "--overprovisioned", "--smp", "1", "--memory", "512M", "--reserve-memory", "0M", "--node-id", "0", "--check=false", "--kafka-addr", "PLAINTEXT://0.0.0.0:9092", "--advertise-kafka-addr", "PLAINTEXT://redpanda:9092"]
+    ports: ["19092:9092"]
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -q Healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  redpanda-console:
+    image: redpandadata/console:v2.8.2
+    environment: {KAFKA_BROKERS: redpanda:9092}
+    ports: ["8081:8080"]
+    depends_on: {redpanda: {condition: service_healthy}}
+
+  recommendation-api:
+    build:
+      context: .
+      dockerfile: apps/recommendation_api/Dockerfile
+    env_file: .env
+    ports: ["8000:8000"]
+    depends_on:
+      redis: {condition: service_healthy}
+      postgres: {condition: service_healthy}
+      redpanda: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+
+  feature-worker:
+    build:
+      context: .
+      dockerfile: apps/feature_worker/Dockerfile
+    env_file: .env
+    depends_on:
+      redis: {condition: service_healthy}
+      postgres: {condition: service_healthy}
+      redpanda: {condition: service_healthy}
+    restart: unless-stopped
+
+  event-generator:
+    build: ./apps/event_generator
+    env_file: .env
+    depends_on: {redpanda: {condition: service_healthy}}
+    profiles: ["tools"]
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.19.0
+    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:////mlflow/mlflow.db --default-artifact-root /mlflow/artifacts
+    volumes: ["mlflow-data:/mlflow"]
+    ports: ["5000:5000"]
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    command: ["--config.file=/etc/prometheus/prometheus.yml"]
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./infra/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+    ports: ["9090:9090"]
+    depends_on: {recommendation-api: {condition: service_healthy}}
+
+  web:
+    image: nginx:1.27-alpine
+    volumes: ["./web:/usr/share/nginx/html:ro"]
+    ports: ["8080:80"]
+
+volumes:
+  postgres-data:
+  mlflow-data:
