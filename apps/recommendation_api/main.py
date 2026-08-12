@@ -11,6 +11,7 @@ import psycopg
 import redis
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from prometheus_client import Counter, Histogram, make_asgi_app
 
@@ -119,7 +120,7 @@ def health() -> dict[str, str]:
 
 
 @app.get("/ready")
-def ready() -> dict[str, Any]:
+def ready() -> Any:
     redis_ok = False
     postgres_ok = False
     try:
@@ -140,11 +141,14 @@ def ready() -> dict[str, Any]:
         # Local unit/demo mode without Postgres still allows serving rankings.
         postgres_ok = True
 
-    return {
+    status = {
         "ready": redis_ok and postgres_ok,
         "redis": redis_ok,
         "postgres": postgres_ok,
     }
+    if not status["ready"]:
+        return JSONResponse(status_code=503, content=status)
+    return status
 
 
 @app.post("/v1/recommendations")
