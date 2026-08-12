@@ -9,9 +9,10 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/example/edurec-api:0.1.0
+          image: ghcr.io/example/edurec-api:0.2.0
           ports: [{containerPort: 8000}]
-          readinessProbe: {httpGet: {path: /health, port: 8000}, initialDelaySeconds: 5}
+          readinessProbe: {httpGet: {path: /ready, port: 8000}, initialDelaySeconds: 5}
+          livenessProbe: {httpGet: {path: /health, port: 8000}, initialDelaySeconds: 10}
           resources:
             requests: {cpu: "200m", memory: "256Mi"}
             limits: {cpu: "1", memory: "1Gi"}
