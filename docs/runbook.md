@@ -12,7 +12,7 @@
 1. Check Redpanda health and consumer lag.
 2. Inspect duplicate and late-event rates.
 3. Scale the feature worker if the backlog continues to grow.
-4. Replay only from a verified offset, and confirm that the deduplication marker still has a valid TTL.
+4. Replay only from a verified offset. PostgreSQL `event_id` is the source of truth; the Redis dedup marker is only a fast-path cache and is rebuilt on durable duplicates.
 
 ## Model rollback
 

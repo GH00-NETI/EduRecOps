@@ -18,7 +18,7 @@ EduRecOps is an independent education-domain project. The system captures learni
 flowchart LR
   UI[Web demo] --> API[FastAPI recommendation]
   GEN[Synthetic learning events] --> KAFKA[Redpanda / Kafka]
-  KAFKA --> WORKER[Idempotent feature worker]
+  KAFKA --> WORKER[Idempotent feature worker PG-first]
   WORKER --> REDIS[(Redis mastery + profile)]
   WORKER --> PG[(PostgreSQL event log)]
   API --> REDIS
@@ -66,9 +66,9 @@ make validate
 ## API contract
 
 ```bash
-curl -X POST http://localhost:8000/v1/recommendations \
-  -H 'Content-Type: application/json' \
-  -d '{"user_id":"u-1001","top_k":5,"context":{"device":"web","hour":20}}'
+curl -X POST http://localhost:8000/v1/recommendations \\
+  -H 'Content-Type: application/json' \\
+  -d '{\"user_id\":\"u-1001\",\"top_k\":5,\"context\":{\"device\":\"web\",\"hour\":20}}'
 ```
 
 The response includes:
