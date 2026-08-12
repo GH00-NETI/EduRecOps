@@ -1,23 +1,23 @@
 # Evaluation protocol
 
-| Lớp | Chỉ số | Gate |
+| Layer | Metrics | Gate |
 | --- | --- | --- |
-| Retrieval | Recall@50, coverage, long-tail recall | Không kém baseline theo cohort |
-| Ranking | NDCG@10, MRR, calibration | NDCG tăng; cold-start không giảm quá ngưỡng |
-| Học tập | completion@7/30d, assessment gain | Không đánh đổi learning outcome lấy click |
-| Fairness | ΔNDCG, exposure parity, average popularity | Báo cáo slice và cảnh báo regression |
-| Vận hành | p95/p99, error rate, feature age, fallback | Gate độc lập với quality gate |
+| Retrieval | Recall@50, coverage, long-tail recall | No regression against the baseline in any cohort |
+| Ranking | NDCG@10, MRR, calibration | Higher NDCG without excessive cold-start regression |
+| Learning | completion@7/30d, assessment gain | Never trade learning outcomes for clicks |
+| Fairness | NDCG gap, exposure parity, average popularity | Report slices and alert on regressions |
+| Operations | p95/p99, error rate, feature age, fallback | Evaluate independently from model-quality gates |
 
-## Chống leakage
+## Leakage prevention
 
-- Label time luôn sau feature event time.
-- Training row chỉ join feature có timestamp không vượt quá label timestamp.
-- Split theo thời gian, không random split toàn cục.
-- Mọi offline report ghi dataset snapshot, code commit, policy và model version.
+- Label time must always follow feature event time.
+- A training row may only join features whose timestamps do not exceed the label timestamp.
+- Use temporal splits rather than a global random split.
+- Every offline report records the dataset snapshot, code commit, policy, and model version.
 
 ## Online experiment
 
-- Shadow trước khi nhận traffic.
-- Sticky assignment theo user.
-- Ramp 10% → 25% → 50% với sample floor.
-- Tự động rollback nếu error delta > 2 điểm phần trăm, p95 > 1.5× control hoặc learning proxy suy giảm.
+- Run in shadow mode before serving user traffic.
+- Use sticky assignment by learner.
+- Ramp from 10% → 25% → 50% with a minimum sample-size requirement.
+- Roll back automatically if the error-rate delta exceeds 2 percentage points, p95 exceeds 1.5× control, or the learning proxy declines.
