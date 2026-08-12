@@ -13,7 +13,7 @@ class Course:
     prerequisites: tuple[tuple[str, float], ...] = ()
     quality_score: float = 0.75
     popularity_score: float = 0.50
-    language: str = "vi"
+    language: str = "en"
 
 
 @dataclass(frozen=True)
@@ -23,7 +23,7 @@ class LearnerProfile:
     completed_courses: frozenset[str] = frozenset()
     mastery: dict[str, float] = field(default_factory=dict)
     recent_categories: tuple[str, ...] = ()
-    language: str = "vi"
+    language: str = "en"
 
 
 @dataclass(frozen=True)
