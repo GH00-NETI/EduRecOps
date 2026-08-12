@@ -69,13 +69,13 @@ class RecommendationPolicy:
             score = sum(self.weights[key] * value for key, value in parts.items())
             reasons = []
             if affinity == 1.0:
-                reasons.append("phù hợp sở thích")
+                reasons.append("matches interests")
             if readiness >= 0.9:
-                reasons.append("đủ kiến thức nền")
+                reasons.append("prerequisites satisfied")
             if learning_value >= 0.6:
-                reasons.append("có giá trị học tập cao")
+                reasons.append("high learning value")
             if novelty == 1.0:
-                reasons.append("mở rộng chủ đề")
+                reasons.append("expands subject coverage")
             source = "learning_path" if course.prerequisites else "discovery"
             rows.append(RankedCourse(course, score, source, parts, tuple(reasons[:3])))
         rows.sort(key=lambda item: (-item.score, item.course.course_id))
