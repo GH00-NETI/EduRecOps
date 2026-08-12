@@ -1,18 +1,18 @@
 # EduRecOps — Outcome-aware Course Recommendation Platform
 
-> Một nền tảng gợi ý khóa học thời gian thực, ưu tiên **mức độ sẵn sàng** và **giá trị học tập** thay vì chỉ tối đa hóa lượt nhấp.
+> A real-time course recommendation platform that prioritizes **learner readiness** and **learning value** instead of maximizing clicks alone.
 
-EduRecOps là đồ án độc lập trong miền giáo dục. Hệ thống thu thập hành vi học tập, duy trì learner mastery online, lọc điều kiện tiên quyết, hợp nhất nhiều nguồn candidate và trả Top-K qua FastAPI. Vòng đời model được thiết kế cho point-in-time training, MLflow lineage, quality gates và progressive rollout.
+EduRecOps is an independent education-domain project. The system captures learning behavior, maintains an online learner-mastery profile, enforces prerequisite constraints, combines multiple candidate sources, and serves Top-K recommendations through FastAPI. The model lifecycle is designed around point-in-time training, MLflow lineage, quality gates, and progressive rollout.
 
-## Vì sao đề tài này khác biệt?
+## What makes this project different?
 
-- **Prerequisite guard là hard constraint:** điểm relevance không thể vượt qua kiến thức nền còn thiếu.
-- **Learning-value policy:** kết hợp affinity, readiness, learning gap, quality, novelty, popularity và exploration.
-- **Outcome-aware evaluation:** completion và assessment gain đứng cùng hàng với Recall/NDCG.
-- **Replayable by design:** response mang request, policy, model và feature timestamps.
-- **Responsible experimentation:** impression + propensity logging phục vụ IPS/SNIPS/DR khi đủ điều kiện.
+- **Prerequisite guard as a hard constraint:** relevance cannot override missing foundational knowledge.
+- **Learning-value policy:** combines affinity, readiness, learning gaps, quality, novelty, popularity, and exploration.
+- **Outcome-aware evaluation:** completion and assessment gains are evaluated alongside Recall and NDCG.
+- **Replayable by design:** every response carries request, policy, model, and feature timestamps.
+- **Responsible experimentation:** impression and propensity logging supports IPS, SNIPS, and DR when the assumptions are valid.
 
-## Kiến trúc
+## Architecture
 
 ```mermaid
 flowchart LR
@@ -33,9 +33,9 @@ flowchart LR
   API --> PROM[Prometheus]
 ```
 
-## Chạy local
+## Run locally
 
-Yêu cầu: Docker và Docker Compose.
+Requirements: Docker and Docker Compose.
 
 ```bash
 cp .env.example .env
@@ -43,7 +43,7 @@ make up
 make smoke
 ```
 
-| Dịch vụ | URL |
+| Service | URL |
 | --- | --- |
 | Web demo | http://localhost:8080 |
 | API docs | http://localhost:8000/docs |
@@ -51,13 +51,13 @@ make smoke
 | MLflow | http://localhost:5000 |
 | Prometheus | http://localhost:9090 |
 
-Tạo 500 event mẫu:
+Generate 500 sample events:
 
 ```bash
 make generate
 ```
 
-Kiểm tra repo:
+Validate the repository:
 
 ```bash
 make validate
@@ -71,41 +71,41 @@ curl -X POST http://localhost:8000/v1/recommendations \
   -d '{"user_id":"u-1001","top_k":5,"context":{"device":"web","hour":20}}'
 ```
 
-Response chứa:
+The response includes:
 
-- `request_id`, `policy_id`, `model_version`;
-- `feature_source`, `feature_generated_at`, `served_at`;
-- candidate source, score breakdown và lý do giải thích cho từng khóa học.
+- `request_id`, `policy_id`, and `model_version`;
+- `feature_source`, `feature_generated_at`, and `served_at`;
+- candidate source, score breakdown, and explanations for every recommended course.
 
-## Cấu trúc repo
+## Repository layout
 
 ```text
-apps/                  API, event generator, streaming feature worker
-packages/edurec_core/  Domain, eligibility, policy và evaluation primitives
+apps/                  API, event generator, and streaming feature worker
+packages/edurec_core/  Domain, eligibility, policy, and evaluation primitives
 feature_repo/          Feast feature definitions
-ml/                    Two-Tower và training scaffold
+ml/                    Two-Tower model and training scaffold
 monitoring/            Drift job
 pipelines/kubeflow/    Validate → train → evaluate → register
-infra/                  PostgreSQL, Prometheus, Kubernetes/KServe
+infra/                  PostgreSQL, Prometheus, and Kubernetes/KServe
 scripts/                Repository validation
 web/                    Responsive recommendation demo
-docs/                   Architecture, contracts, evaluation, research, runbook
-tests/                  Policy, event-contract và metric tests
+docs/                   Architecture, contracts, evaluation, research, and runbook
+tests/                  Policy, event-contract, and metric tests
 ```
 
 ## Research gates
 
-| Nhóm | Mục tiêu ban đầu |
+| Area | Initial target |
 | --- | --- |
-| Retrieval | Recall@50 ≥ 0.35 và không giảm theo cohort |
-| Ranking | NDCG@10 ≥ 0.20; báo cáo calibration |
-| Learning | Không giảm completion@30d; theo dõi assessment gain |
-| Serving | p95 < 150 ms tại 100 RPS trong demo |
-| Freshness | Feature age < 10 giây |
-| Reliability | Replay duplicate/out-of-order không làm sai state |
+| Retrieval | Recall@50 ≥ 0.35 with no cohort regression |
+| Ranking | NDCG@10 ≥ 0.20 with calibration reporting |
+| Learning | No regression in completion@30d; track assessment gains |
+| Serving | p95 < 150 ms at 100 RPS in the demo environment |
+| Freshness | Feature age < 10 seconds |
+| Reliability | Duplicate and out-of-order replay does not corrupt state |
 
-Xem [research plan](docs/research-plan.md), [evaluation protocol](docs/evaluation.md), [architecture](docs/architecture.md), [data contracts](docs/data-contracts.md) và [runbook](docs/runbook.md).
+See the [research plan](docs/research-plan.md), [evaluation protocol](docs/evaluation.md), [architecture](docs/architecture.md), [data contracts](docs/data-contracts.md), and [runbook](docs/runbook.md).
 
 ## License
 
-MIT — xem [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).
