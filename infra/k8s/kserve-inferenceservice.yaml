@@ -3,6 +3,10 @@ kind: InferenceService
 metadata:
   name: edurec-ranker
   namespace: ml-serving
+  annotations:
+    # canaryTrafficPercent is honored only in Serverless mode.
+    # RawDeployment/Standard silently ignores it and does a full rollout.
+    serving.kserve.io/deploymentMode: Serverless
 spec:
   predictor:
     canaryTrafficPercent: 10

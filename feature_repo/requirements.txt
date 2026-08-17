@@ -1,1 +1,1 @@
-feast==0.40.1
+feast[redis]==0.65.0

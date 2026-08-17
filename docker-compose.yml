@@ -27,9 +27,20 @@ services:
       retries: 20
 
   redpanda:
-    image: redpandadata/redpanda:v24.3.1
-    command: ["redpanda", "start", "--overprovisioned", "--smp", "1", "--memory", "512M", "--reserve-memory", "0M", "--node-id", "0", "--check=false", "--kafka-addr", "PLAINTEXT://0.0.0.0:9092", "--advertise-kafka-addr", "PLAINTEXT://redpanda:9092"]
-    ports: ["19092:9092"]
+    image: docker.redpanda.com/redpandadata/redpanda:v26.2.1
+    command:
+      - redpanda
+      - start
+      - --kafka-addr
+      - internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr
+      - internal://redpanda:9092,external://localhost:19092
+      - --mode
+      - dev-container
+      - --smp
+      - "1"
+      - --default-log-level=info
+    ports: ["19092:19092"]
     healthcheck:
       test: ["CMD-SHELL", "rpk cluster health | grep -q Healthy"]
       interval: 10s
@@ -37,8 +48,14 @@ services:
       retries: 20
 
   redpanda-console:
-    image: redpandadata/console:v2.8.2
-    environment: {KAFKA_BROKERS: redpanda:9092}
+    image: docker.redpanda.com/redpandadata/console:v3.10.0
+    entrypoint: /bin/sh
+    command: -c 'echo "$$CONSOLE_CONFIG_FILE" > /tmp/config.yml; /app/console'
+    environment:
+      CONFIG_FILEPATH: /tmp/config.yml
+      CONSOLE_CONFIG_FILE: |
+        kafka:
+          brokers: ["redpanda:9092"]
     ports: ["8081:8080"]
     depends_on: {redpanda: {condition: service_healthy}}
 
@@ -76,13 +93,13 @@ services:
     profiles: ["tools"]
 
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.19.0
+    image: ghcr.io/mlflow/mlflow:v2.22.5
     command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:////mlflow/mlflow.db --default-artifact-root /mlflow/artifacts
     volumes: ["mlflow-data:/mlflow"]
     ports: ["5000:5000"]
 
   prometheus:
-    image: prom/prometheus:v2.55.1
+    image: prom/prometheus:v3.13.2
     command: ["--config.file=/etc/prometheus/prometheus.yml"]
     volumes:
       - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
@@ -91,7 +108,7 @@ services:
     depends_on: {recommendation-api: {condition: service_healthy}}
 
   web:
-    image: nginx:1.27-alpine
+    image: nginx:1.30.4-alpine
     volumes: ["./web:/usr/share/nginx/html:ro"]
     ports: ["8080:80"]
 

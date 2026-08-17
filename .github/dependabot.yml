@@ -1,0 +1,30 @@
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /apps/recommendation_api
+    schedule:
+      interval: weekly
+  - package-ecosystem: pip
+    directory: /apps/feature_worker
+    schedule:
+      interval: weekly
+  - package-ecosystem: pip
+    directory: /apps/event_generator
+    schedule:
+      interval: weekly
+  - package-ecosystem: pip
+    directory: /ml
+    schedule:
+      interval: weekly
+  - package-ecosystem: pip
+    directory: /feature_repo
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
