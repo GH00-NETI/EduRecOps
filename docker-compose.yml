@@ -93,7 +93,7 @@ services:
     profiles: ["tools"]
 
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.22.5
+    image: ghcr.io/mlflow/mlflow:v3.15.1
     command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:////mlflow/mlflow.db --default-artifact-root /mlflow/artifacts
     volumes: ["mlflow-data:/mlflow"]
     ports: ["5000:5000"]
