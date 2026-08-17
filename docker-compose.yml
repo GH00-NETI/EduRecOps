@@ -108,7 +108,7 @@ services:
     depends_on: {recommendation-api: {condition: service_healthy}}
 
   web:
-    image: nginx:1.30.4-alpine
+    image: nginx:1.31.3-alpine
     volumes: ["./web:/usr/share/nginx/html:ro"]
     ports: ["8080:80"]
 
