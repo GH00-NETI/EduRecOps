@@ -20,3 +20,7 @@
 2. Point the stable manifest to the previous champion digest.
 3. Verify p95 latency, error rate, and the output contract.
 4. Record the incident with model, feature, dataset, and commit lineage.
+
+## KServe canary
+
+`canaryTrafficPercent` only splits traffic in **Serverless** deployment mode. The InferenceService must keep `serving.kserve.io/deploymentMode: Serverless`. In RawDeployment/Standard mode KServe ignores the field and rolls 100% of traffic to the new revision with no warning. Rollback by setting `canaryTrafficPercent: 0` so traffic pins to the previous healthy revision.
